@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Async ball</title>
+    <style>
+      .ball1 {
+        width: 50px;
+        height: 50px;
+        background-color: aqua;
+        border-radius: 50%;
+        transform: translateX(0);    
+      }
+      .ball2 {
+        width: 50px;
+        height: 50px;
+        background-color: darkorange;
+        border-radius: 50%;
+        transform: translateX(0);
+      }
+      .ball3 {
+        width: 50px;
+        height: 50px;
+        background-color: slategrey;
+        border-radius: 50%;
+        transform: translateX(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ball ball1" ></div>
+    <div class="ball ball2" ></div>
+    <div class="ball ball3" ></div>
+    <script type="text/javascript">
+      const ball1 = document.querySelector(".ball1")
+      const ball2 = document.querySelector('.ball2')
+      const ball3 = document.querySelector('.ball3')
+
+
+      //回调
+      function move(ball, target, cb) {
+            var time = setInterval(function () {
+            var translates=document.defaultView.getComputedStyle(ball,null).transform;
+            var new_locate=translates.split(',')[4]
+                var start = parseInt(new_locate)
+                if (start === target) {
+                    cb && cb();
+                    clearInterval(time);
+                } else {
+                    if (start < target) {
+                        start++;
+                    } else if (start > target) {
+                        start--;
+                    }
+                    ball.style.transform=`translateX(`+start+`px)`
+                }
+            }, 10)
+        }
+        move(ball1, 200, function () {
+            move(ball2, 200, function () {
+                move(ball3, 200, function () {         
+                })
+            })
+        })
+        
+
+
+
+      // promise
+      function move(ball,target) {
+
+			  return new Promise(function(resolve,reject) {
+						function moved(){
+						setTimeout(function(){
+            var translates=document.defaultView.getComputedStyle(ball,null).transform;
+            var new_locate=translates.split(',')[4]
+						let start = parseInt(new_locate);
+						if(start === target){
+							resolve()
+							return;
+						}else{
+							if(start < target){
+								start++;
+							}else{
+								start--;
+							}
+						}
+            ball.style.transform=`translateX(`+start+`px)`
+						moved();
+					},10)
+				}
+				moved();
+			})
+		}
+		move(ball1,200)
+		.then(function(){
+			return move(ball2,200)
+		})
+		.then(function(){
+			return move(ball3,200)
+		})
+   
+
+
+
+      // async/await 
+      async function go() {
+          await new Promise((resolve,reject)=>{
+            move(ball1,200,()=>{
+              resolve()
+            })
+          })
+          await new Promise((resolve,reject)=>{
+            move(ball2,200,()=>{
+              resolve()
+            })
+          })
+          await new Promise((resolve,reject)=>{
+            move(ball3,200,()=>{
+              resolve()
+            })
+          })
+      }
+      go()
+    </script>
+  </body>
+</html>
